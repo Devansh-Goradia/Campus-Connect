@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-cyan: #00f5ff;
+  --color-neon-green: #39ff14;
+  --color-neon-pink: #ff10f0;
+  --color-neon-purple: #bf5fff;
+  --color-neon-orange: #ff6d00;
+  --color-neon-yellow: #ffe600;
+  --color-neon-blue: #4d9fff;
+  --color-surface: #0a0a0a;
+  --color-surface-card: #111111;
+  --color-surface-border: #1e1e1e;
+  --color-surface-muted: #252525;
+  --color-surface-hover: #1a1a1a;
+}
+
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #252525 transparent;
+}
+*::-webkit-scrollbar {
+  width: 4px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #252525;
+  border-radius: 999px;
+}
+
+/* Neon grid background */
+.bg-neon-grid {
+  background-image: linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Animations */
+@keyframes bounceIn {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.05); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  0%   { transform: translateY(16px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+  0%   { transform: translateY(40px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes radar {
+  0%   { transform: scale(0); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+@keyframes glow {
+  0%   { box-shadow: 0 0 5px #00f5ff, 0 0 10px #00f5ff; }
+  100% { box-shadow: 0 0 20px #00f5ff, 0 0 40px #00f5ff, 0 0 60px #00f5ff; }
+}
+
+.animate-bounce-in  { animation: bounceIn 0.5s ease-out; }
+.animate-fade-up    { animation: fadeUp 0.4s ease-out; }
+.animate-slide-up   { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-radar      { animation: radar 2s linear infinite; }
+.animate-glow       { animation: glow 2s ease-in-out infinite alternate; }
+.animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-spin-slow  { animation: spin 4s linear infinite; }
+
+/* Neon shadow utilities */
+.shadow-neon-cyan   { box-shadow: 0 0 20px rgba(0,245,255,0.4); }
+.shadow-neon-green  { box-shadow: 0 0 20px rgba(57,255,20,0.4); }
+.shadow-neon-pink   { box-shadow: 0 0 20px rgba(255,16,240,0.4); }
+.shadow-neon-purple { box-shadow: 0 0 20px rgba(191,95,255,0.4); }
