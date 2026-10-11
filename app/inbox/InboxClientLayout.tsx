@@ -8,9 +8,8 @@ import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/Navbar'
 import { getAvatarColor, getInitials } from '@/utils/avatar'
 import { clsx } from 'clsx'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Sparkles, PartyPopper } from 'lucide-react'
 
-// Basic type for our conversation list
 export type ChatSessionItem = {
   id: string
   peerId: string
@@ -21,7 +20,7 @@ export type ChatSessionItem = {
   lastMessageAt: string
 }
 
-export default function InboxLayout({ children }: { children: React.ReactNode }) {
+export default function InboxClientLayout({ children }: { children: React.ReactNode }) {
   const { profile } = useAuth()
   const params = useParams()
   const router = useRouter()
@@ -36,11 +35,6 @@ export default function InboxLayout({ children }: { children: React.ReactNode })
     if (!profile) return
 
     async function fetchSessions() {
-      // We need to join with profiles to get peer info.
-      // Since user1_id could be me or peer, and user2_id could be me or peer,
-      // it's a bit tricky to query nicely in one go with PostgREST without a view.
-      // For MVP, fetch all where I'm involved, then map them.
-      
       const { data, error } = await supabase
         .from('chat_sessions')
         .select(`
@@ -82,16 +76,14 @@ export default function InboxLayout({ children }: { children: React.ReactNode })
 
     fetchSessions()
 
-    // Realtime subscription for sessions (to update order on new message or reveal)
     const channel = supabase
       .channel('public:chat_sessions')
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
         table: 'chat_sessions',
-        filter: `user1_id=eq.${profile.id}` // Wait, realtime filter on OR isn't supported easily.
+        filter: `user1_id=eq.${profile.id}`
       }, () => {
-        // Just refetch on any change for simplicity in this MVP
         fetchSessions()
       })
       .on('postgres_changes', { 
@@ -110,97 +102,104 @@ export default function InboxLayout({ children }: { children: React.ReactNode })
   }, [profile, supabase])
 
   return (
-    <div className="h-screen flex flex-col bg-surface overflow-hidden">
+    <div className="h-screen flex flex-col font-sans overflow-hidden">
       <Navbar />
 
-      <div className="flex-1 flex overflow-hidden max-w-6xl mx-auto w-full border-x border-surface-border">
+      <div className="flex-1 flex overflow-hidden max-w-6xl mx-auto w-full border-x border-white/10">
         
-        {/* Sidebar (Conversations List) */}
+        {/* Sidebar */}
         <div className={clsx(
-          "w-full md:w-80 lg:w-96 flex flex-col border-r border-surface-border bg-surface-card",
+          "w-full md:w-80 lg:w-96 flex flex-col border-r border-white/10 bg-zinc-950/60 backdrop-blur-xl",
           activeId ? "hidden md:flex" : "flex"
         )}>
-          <div className="p-4 border-b border-surface-border">
-            <h2 className="font-bold text-lg text-white flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-neon-purple" />
-              Conversations
+          <div className="p-5 border-b border-white/10 flex items-center justify-between">
+            <h2 className="font-extrabold text-sm text-white flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-indigo-400" />
+              Your Chats
             </h2>
+            <span className="text-xs font-bold text-zinc-400 px-2.5 py-0.5 rounded-full bg-white/10">
+              {sessions.length}
+            </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {loading ? (
-              <div className="p-4 space-y-4">
-                {[1,2,3].map(i => (
-                  <div key={i} className="flex gap-3 animate-pulse">
-                    <div className="w-12 h-12 bg-surface-muted rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-surface-muted rounded w-1/2 mb-2"></div>
-                      <div className="h-3 bg-surface-muted rounded w-3/4"></div>
+              <div className="p-3 space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex gap-3 animate-pulse p-3 rounded-2xl bg-white/5">
+                    <div className="w-12 h-12 bg-white/10 rounded-2xl"></div>
+                    <div className="flex-1 space-y-2 py-1">
+                      <div className="h-3 bg-white/10 rounded-full w-1/2"></div>
+                      <div className="h-2 bg-white/5 rounded-full w-3/4"></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : sessions.length === 0 ? (
-              <div className="p-8 text-center text-white/40">
-                No active chats yet. Go to Discover to find someone!
+              <div className="p-8 text-center text-sm font-medium text-zinc-400 space-y-2">
+                <div className="text-3xl mb-1">💬</div>
+                <p>No active chats yet!</p>
+                <p className="text-xs text-zinc-500">Hit Discover to connect with someone.</p>
               </div>
             ) : (
-              <div className="divide-y divide-surface-border">
-                {sessions.map(session => {
-                  // If revealed, use real name, otherwise alias
-                  const displayName = session.isRevealed ? session.peerName : session.peerAlias
-                  const avatarClasses = getAvatarColor(session.peerAlias)
-                  const initials = getInitials(displayName)
-                  
-                  return (
-                    <Link 
-                      key={session.id} 
-                      href={`/inbox/${session.id}`}
-                      className={clsx(
-                        "flex items-center gap-3 p-4 hover:bg-surface-muted/50 transition-colors cursor-pointer",
-                        activeId === session.id ? "bg-surface-muted border-l-2 border-neon-cyan" : ""
-                      )}
-                    >
-                      <div className="relative">
-                        {session.isRevealed && session.peerRealPhoto ? (
-                          <img src={session.peerRealPhoto} alt="" className="w-12 h-12 rounded-full object-cover border border-surface-border" />
-                        ) : (
-                          <div className={clsx("w-12 h-12 rounded-full flex items-center justify-center font-bold text-white shadow-inner", avatarClasses)}>
-                            {initials}
-                          </div>
-                        )}
-                        {session.isRevealed && (
-                          <div className="absolute -bottom-1 -right-1 bg-neon-pink w-4 h-4 rounded-full border-2 border-surface-card" title="Identity Revealed!"></div>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-baseline mb-1">
-                          <h3 className={clsx(
-                            "font-semibold truncate", 
-                            session.isRevealed ? "text-neon-pink" : "text-white"
-                          )}>
-                            {displayName}
-                          </h3>
-                          <span className="text-[10px] text-white/40 whitespace-nowrap ml-2">
-                            {new Date(session.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
+              sessions.map(session => {
+                const displayName = session.isRevealed ? session.peerName : session.peerAlias
+                const avatarClasses = getAvatarColor(session.peerAlias)
+                const initials = getInitials(displayName)
+                const isActive = activeId === session.id
+                
+                return (
+                  <Link 
+                    key={session.id} 
+                    href={`/inbox/${session.id}`}
+                    className={clsx(
+                      "flex items-center gap-3.5 p-3.5 rounded-2xl transition-all duration-200 cursor-pointer relative",
+                      isActive 
+                        ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 shadow-md" 
+                        : "hover:bg-white/5 border border-transparent"
+                    )}
+                  >
+                    <div className="relative shrink-0">
+                      {session.isRevealed && session.peerRealPhoto ? (
+                        <img src={session.peerRealPhoto} alt="" className="w-12 h-12 rounded-2xl object-cover border-2 border-indigo-400 shadow-md" />
+                      ) : (
+                        <div className={clsx("w-12 h-12 rounded-2xl flex items-center justify-center font-extrabold text-sm shadow-md", avatarClasses)}>
+                          {initials}
                         </div>
-                        <p className="text-sm text-white/50 truncate">
-                          {session.isRevealed ? "Real identity unlocked 🔓" : "Anonymous Chat"}
-                        </p>
+                      )}
+                      {session.isRevealed && (
+                        <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white p-1 rounded-full border-2 border-zinc-950" title="Identity Unlocked!">
+                          <PartyPopper className="w-2.5 h-2.5" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-baseline mb-1">
+                        <h3 className={clsx(
+                          "font-bold text-sm truncate", 
+                          session.isRevealed ? "text-pink-300 font-extrabold" : "text-white"
+                        )}>
+                          {displayName}
+                        </h3>
+                        <span className="text-[10px] font-semibold text-zinc-500 whitespace-nowrap ml-2">
+                          {new Date(session.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
-                    </Link>
-                  )
-                })}
-              </div>
+                      <p className="text-xs font-medium text-zinc-400 truncate">
+                        {session.isRevealed ? "Real identity revealed! 🎉" : "Anonymous conversation"}
+                      </p>
+                    </div>
+                  </Link>
+                )
+              })
             )}
           </div>
         </div>
 
-        {/* Main Content Area */}
+        {/* Chat area */}
         <div className={clsx(
-          "flex-1 flex flex-col bg-surface relative",
+          "flex-1 flex flex-col bg-zinc-950/40 relative",
           !activeId ? "hidden md:flex" : "flex"
         )}>
           {children}

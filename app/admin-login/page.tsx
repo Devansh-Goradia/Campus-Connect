@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { ShieldCheck } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
@@ -31,7 +32,6 @@ export default function AdminLoginPage() {
       return
     }
 
-    // Verify they are actually an admin
     const { data: { session } } = await supabase.auth.getSession()
     if (session) {
       const { data: profile } = await supabase
@@ -53,45 +53,52 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-red-900/10">
-      <div className="w-full max-w-md bg-surface-card border-2 border-red-500/20 p-8 rounded-2xl shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4 border border-red-500/30">
-            <span className="text-3xl">🛡️</span>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-zinc-900/60 backdrop-blur-2xl border border-white/10 p-8 sm:p-10 rounded-3xl shadow-2xl space-y-6 animate-fade-in">
+        
+        <div className="text-center space-y-2">
+          <div className="inline-flex h-12 w-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 items-center justify-center shadow-lg shadow-rose-500/20 mb-2">
+            <ShieldCheck className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-red-400">Admin Portal</h1>
-          <p className="text-white/50 mt-2 text-sm">Strictly restricted access</p>
+          <h1 className="text-2xl font-extrabold text-white">
+            Admin Portal 🛡️
+          </h1>
+          <p className="text-sm font-medium text-zinc-400">
+            Institutional verification & ID review
+          </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-4">
           <Input
             id="email"
             type="email"
             label="Admin Email"
+            placeholder="admin@campusconnect.edu"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="border-red-500/30 focus:border-red-500 focus:ring-red-500/50"
           />
           <Input
             id="password"
             type="password"
             label="Password"
+            placeholder="••••••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="border-red-500/30 focus:border-red-500 focus:ring-red-500/50"
           />
 
           {error && (
-            <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-sm text-red-200">
+            <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs font-semibold text-rose-300">
               {error}
             </div>
           )}
 
-          <Button type="submit" variant="danger" fullWidth loading={loading}>
-            Authenticate
-          </Button>
+          <div className="pt-2">
+            <Button type="submit" variant="primary" fullWidth loading={loading} size="lg">
+              Authenticate Admin
+            </Button>
+          </div>
         </form>
       </div>
     </div>

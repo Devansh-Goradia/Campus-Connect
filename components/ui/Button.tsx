@@ -20,25 +20,25 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "relative inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface disabled:opacity-40 disabled:cursor-not-allowed select-none";
+    "relative inline-flex items-center justify-center font-bold rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#09090b] disabled:opacity-40 disabled:cursor-not-allowed select-none active:scale-95 cursor-pointer";
 
   const variants = {
     primary:
-      "bg-neon-cyan text-black hover:brightness-110 focus:ring-neon-cyan shadow-neon-cyan active:scale-95",
+      "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:brightness-110",
     secondary:
-      "bg-surface-muted text-white border border-surface-border hover:bg-surface-hover hover:border-neon-cyan/30 focus:ring-neon-cyan/50 active:scale-95",
+      "bg-white/10 text-white border border-white/10 hover:bg-white/15 hover:border-white/20 backdrop-blur-md shadow-sm",
     ghost:
-      "text-white/70 hover:text-white hover:bg-surface-hover focus:ring-white/20 active:scale-95",
+      "text-zinc-300 hover:text-white hover:bg-white/10",
     danger:
-      "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 focus:ring-red-500/50 active:scale-95",
+      "bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30",
     neon:
-      "bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink text-black hover:brightness-110 focus:ring-neon-cyan shadow-neon-cyan active:scale-95",
+      "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/30 hover:brightness-110",
   };
 
   const sizes = {
-    sm: "px-3 py-1.5 text-xs gap-1.5",
-    md: "px-5 py-2.5 text-sm gap-2",
-    lg: "px-7 py-3.5 text-base gap-2.5",
+    sm: "px-4 py-2 text-xs gap-1.5",
+    md: "px-6 py-2.5 text-sm gap-2",
+    lg: "px-8 py-3.5 text-base gap-2.5",
   };
 
   return (
@@ -74,7 +74,9 @@ export function Button({
           />
         </svg>
       )}
-      <span className={loading ? "opacity-0" : ""}>{children}</span>
+      <span className={clsx("flex items-center gap-2", loading && "opacity-0")}>
+        {children}
+      </span>
     </button>
   );
 }

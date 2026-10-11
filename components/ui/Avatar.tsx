@@ -10,28 +10,19 @@ interface AvatarProps {
 }
 
 const sizeMap = {
-  xs: "h-7 w-7 text-base",
-  sm: "h-9 w-9 text-xl",
-  md: "h-12 w-12 text-2xl",
-  lg: "h-16 w-16 text-3xl",
-  xl: "h-24 w-24 text-5xl",
+  xs: "h-7 w-7 text-xs font-bold",
+  sm: "h-9 w-9 text-sm font-bold",
+  md: "h-12 w-12 text-base font-extrabold",
+  lg: "h-16 w-16 text-xl font-extrabold",
+  xl: "h-20 w-20 text-2xl font-extrabold",
 };
 
-const glowMap = {
-  cyan: "ring-2 ring-neon-cyan/60 shadow-neon-cyan",
-  green: "ring-2 ring-neon-green/60 shadow-neon-green",
-  pink: "ring-2 ring-neon-pink/60 shadow-neon-pink",
-  purple: "ring-2 ring-neon-purple/60 shadow-neon-purple",
-  none: "",
-};
-
-export function Avatar({ emoji, src, alt = "", size = "md", glow = "none", className }: AvatarProps) {
+export function Avatar({ emoji, src, alt = "", size = "md", className }: AvatarProps) {
   return (
     <div
       className={clsx(
-        "relative flex items-center justify-center rounded-full bg-surface-muted overflow-hidden shrink-0",
+        "relative flex items-center justify-center rounded-2xl overflow-hidden shrink-0 shadow-md",
         sizeMap[size],
-        glowMap[glow],
         className
       )}
     >
@@ -39,7 +30,7 @@ export function Avatar({ emoji, src, alt = "", size = "md", glow = "none", class
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt={alt} className="h-full w-full object-cover" />
       ) : (
-        <span className="leading-none select-none">{emoji ?? "👤"}</span>
+        <span className="leading-none select-none text-white font-black">{emoji ?? "✨"}</span>
       )}
     </div>
   );
